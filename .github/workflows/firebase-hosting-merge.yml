@@ -11,7 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cd frontend && npm install && npm run build 
+
+      # Specify the frontend directory where your package.json is located
+      - name: Install dependencies and build frontend
+        working-directory: ./frontend  # Add this line to specify the directory
+        run: |
+          npm ci
+          npm run build
+          
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
