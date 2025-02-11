@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./components/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function Feedback() {
@@ -7,7 +6,7 @@ function Feedback() {
     const location = useLocation();
     
     const [dashboardId, setDashboardId] = useState("");
-    const [showPopup, setShowPopup] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (location.state?.dashboardId) {
@@ -30,7 +29,7 @@ function Feedback() {
         e.preventDefault();
         console.log("Feedback submitted:", { dashboardId, ...feedback });
 
-        setShowPopup(true);
+        setIsSubmitting(true); // Show loading animation
 
         setTimeout(() => {
             navigate(`/dashboard/${dashboardId}`);
@@ -39,7 +38,6 @@ function Feedback() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[#333652] px-4">
-            <Navbar />
             <div className="bg-white p-6 sm:p-8 shadow-lg rounded-lg w-full max-w-lg">
                 <h1 className="text-xl sm:text-2xl font-bold text-center text-[#333652] mb-4">Submit Feedback</h1>
                 <p className="text-center text-gray-600 mb-6">Your feedback helps us improve PhishGuard AI.</p>
@@ -82,26 +80,44 @@ function Feedback() {
                     <button
                         type="submit"
                         className="w-full px-4 py-2 text-white text-sm sm:text-lg font-semibold rounded-lg bg-[#0f61a5] hover:bg-[#d3941a] transition-colors"
-                        disabled={!dashboardId}
+                        disabled={!dashboardId || isSubmitting}
                     >
                         Submit Feedback
                     </button>
                 </form>
             </div>
 
-            {showPopup && (
+            {/* Processing Modal with Loader */}
+            {isSubmitting && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
-                    <div className="bg-white p-6 rounded-lg shadow-lg text-center w-4/5 sm:w-96">
-                        <h2 className="text-xl sm:text-2xl font-bold text-[#333652]">Thank You!</h2>
-                        <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                            Your feedback has been submitted successfully.
-                        </p>
-                        <p className="text-gray-500 mt-2 text-sm sm:text-base">
-                            Redirecting you to the dashboard...
-                        </p>
-                    </div>
+                <div className="bg-white p-6 rounded-lg text-center shadow-lg flex flex-col items-center">
+                  {/* Spinner Animation */}
+                  <div className="loader mb-4"></div>
+      
+                  <h2 className="text-xl font-semibold text-gray-800">Thank you for your feedback!</h2>
+                  <p className="text-gray-600 mt-2">Redirecting you back to the dashboard.</p>
                 </div>
+              </div>
             )}
+      
+            {/* Loader Animation (CSS) */}
+            <style>
+              {`
+                .loader {
+                  border: 4px solid rgba(0, 0, 0, 0.1);
+                  border-left-color: #d3941a;
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  animation: spin 1s linear infinite;
+                }
+      
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}
+            </style>
         </div>
     );
 }

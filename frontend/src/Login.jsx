@@ -4,17 +4,17 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setShowPopup(true); // Show the popup
+    setIsSubmitting(true); // Show the loader immediately
 
-    // Redirect after 3 seconds
+    // Simulate a fake delay before redirecting
     setTimeout(() => {
       navigate("/home");
-    }, 3000);
+    }, 2500);
   };
 
   return (
@@ -75,9 +75,14 @@ function Login() {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full sm:w-1/2 px-6 py-3 bg-[#0f61a5] text-white font-semibold rounded-3xl hover:bg-[#084980] transition-colors mt-4 mx-auto block"
+            disabled={isSubmitting}
+            className={`w-full sm:w-1/2 px-6 py-3 font-semibold rounded-3xl transition-colors mt-4 mx-auto block ${
+              isSubmitting
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-[#0f61a5] text-white hover:bg-[#084980]"
+            }`}
           >
-            Log In
+            {isSubmitting ? "Logging in..." : "Log In"}
           </button>
 
           {/* Sign Up Link */}
@@ -90,20 +95,37 @@ function Login() {
         </form>
       </div>
 
-      {/* Popup Modal */}
-      {showPopup && (
+      {/* Processing Modal with Loader */}
+      {isSubmitting && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-4/5 sm:w-96">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#333652]">Login Successful!</h2>
-            <p className="text-gray-600 mt-2 text-sm sm:text-base">
-              Welcome back to PhishGuard AI.
-            </p>
-            <p className="text-gray-500 mt-2 text-sm sm:text-base">
-              Redirecting you to the dashboard...
-            </p>
+          <div className="bg-white p-6 rounded-lg text-center shadow-lg flex flex-col items-center">
+            {/* Spinner Animation */}
+            <div className="loader mb-4"></div>
+
+            <h2 className="text-xl font-semibold text-gray-800">Login Successful!</h2>
+            <p className="text-gray-600 mt-2">Redirecting you to the dashboard...</p>
           </div>
         </div>
       )}
+
+      {/* Loader Animation (CSS) */}
+      <style>
+        {`
+          .loader {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #d3941a;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 }

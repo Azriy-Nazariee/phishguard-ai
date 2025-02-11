@@ -1,14 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
 
 const History = ({ analysisResults }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#333652] text-white px-6 md:px-10 pt-24 pb-16">
-      <Navbar />
-
+    <div className="min-h-screen bg-[#333652] text-white px-6 md:px-10 py-10">
       {/* Header Section */}
       <header className="flex flex-col md:flex-row items-center justify-center text-center md:text-left space-y-4 md:space-y-0 md:space-x-6 mb-6">
         {/* Logo */}
@@ -20,25 +17,29 @@ const History = ({ analysisResults }) => {
         </h1>
       </header>
 
-      {/* Display either table or card layout based on screen size */}
+      {/* Table View for Larger Screens */}
       <div className="hidden md:block">
-        {/* Table View for Larger Screens */}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-white text-black rounded-lg shadow-lg">
+          <table className="w-full border-collapse bg-white text-black rounded-lg shadow-lg overflow-hidden">
             <thead>
               <tr className="bg-[#d3941a] text-white text-sm md:text-lg">
-                <th className="p-4">ID</th>
+                <th className="p-4 first:rounded-tl-lg last:rounded-tr-lg">ID</th>
                 <th className="p-4">Date Analysed</th>
                 <th className="p-4">Email Title</th>
                 <th className="p-4 hidden md:table-cell">Sender</th>
                 <th className="p-4">Status</th>
-                <th className="p-4">Report</th>
+                <th className="p-4 last:rounded-tr-lg">Report</th>
               </tr>
             </thead>
             <tbody>
               {analysisResults.length > 0 ? (
-                analysisResults.map((result) => (
-                  <tr key={result.id} className="border-t text-sm md:text-base">
+                analysisResults.map((result, index) => (
+                  <tr
+                    key={result.id}
+                    className={`border-t text-sm md:text-base transition-colors duration-200 ${
+                      index === analysisResults.length - 1 ? "last:rounded-b-lg" : ""
+                    } hover:bg-gray-200`}
+                  >
                     <td className="p-4 text-center">{result.id}</td>
                     <td className="p-4 text-center">{result.date}</td>
                     <td className="p-4 text-center">{result.title}</td>
@@ -46,12 +47,10 @@ const History = ({ analysisResults }) => {
                     <td className="p-4 text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap flex items-center justify-center ${
-                          result.isPhishing
-                            ? "bg-red-500 text-white"
-                            : "bg-green-500 text-white"
+                          result.isPhishing ? "bg-red-500 text-white" : "bg-green-500 text-white"
                         }`}
                       >
-                        {result.isPhishing ? "Phishing Detected" : "Safe"}
+                        {result.isPhishing ? "Phishing Detected" : "Legitimate Email"}
                       </span>
                     </td>
                     <td className="p-4 text-center">
@@ -67,7 +66,7 @@ const History = ({ analysisResults }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="p-4 text-center text-gray-500">
+                  <td colSpan="6" className="p-4 text-center text-gray-500 last:rounded-b-lg">
                     No analysis history available.
                   </td>
                 </tr>
@@ -95,7 +94,7 @@ const History = ({ analysisResults }) => {
                     result.isPhishing ? "bg-red-500 text-white" : "bg-green-500 text-white"
                   }`}
                 >
-                  {result.isPhishing ? "Phishing Detected" : "Safe"}
+                  {result.isPhishing ? "Phishing Detected" : "Legitimate Email"}
                 </span>
               </p>
               <button

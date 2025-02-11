@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  FaEnvelopeOpenText,
-  FaTachometerAlt,
-  FaHistory,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import { FaEnvelopeOpenText, FaHistory, FaSignOutAlt } from "react-icons/fa";
 
 function Navbar() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -25,7 +20,7 @@ function Navbar() {
   return (
     <>
       {/* Navbar */}
-      <nav className="w-full fixed top-0 left-0 bg-white text-black py-4 shadow-lg z-50">
+      <nav className="w-full bg-white text-black py-4 shadow-lg">
         <ul className="flex justify-center space-x-12">
           <li>
             <Link
@@ -59,7 +54,7 @@ function Navbar() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <h3 className="text-xl font-semibold text-gray-800">
               Log Out Confirmation
@@ -88,14 +83,38 @@ function Navbar() {
       {/* Thank You Modal */}
       {showThankYouModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3 text-center">
-            <h2 className="text-xl text-black font-semibold mb-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-4/5 sm:w-96 flex flex-col items-center">
+            {/* Centered Loading Spinner */}
+            <div className="loader mb-4"></div>
+
+            <h2 className="text-xl text-black font-semibold">
               Thank you for using our service!
             </h2>
-            <p className="text-gray-600">You will be redirected shortly.</p>
+            <p className="text-gray-600 mt-2">
+              You will be redirected shortly.
+            </p>
           </div>
         </div>
       )}
+
+      {/* Loader Animation (CSS) */}
+      <style>
+        {`
+    .loader {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #d3941a;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `}
+      </style>
     </>
   );
 }

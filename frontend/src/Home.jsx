@@ -1,88 +1,116 @@
-import React from "react";
-import Navbar from "./components/Navbar";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
-  
-  return (
-    <div className="min-h-screen flex flex-col items-center bg-[#333652] py-10 px-4 md:px-6">
-      <Navbar />
+  const [isUploading, setIsUploading] = useState(false);
 
+  // Handles file upload
+  const handleUpload = (event) => {
+    if (event.target.files.length > 0) {
+      setIsUploading(true); // Show "Processing..." modal
+
+      setTimeout(() => {
+        setIsUploading(false);
+        navigate("/dashboard/1"); // Redirect after processing
+      }, 2000);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center bg-[#333652] py-10 md:px-6">
       {/* Hero Section */}
-      <header className="flex flex-col items-center text-center space-y-6 p-6">
+      <header className="flex flex-col items-center text-center space-y-6">
         {/* Logo */}
         <img src="/welcome.png" alt="Home Icon" className="w-40 md:w-64 h-auto max-w-full" />
 
-        {/* Description (Now Below the Logo) */}
-        <div className="flex flex-col items-center">
-          <h1 className="text-3xl md:text-5xl text-white font-bold">
-            Welcome to PhishGuard AI!
-          </h1>
-          <p className="mt-2 text-lg md:text-2xl text-white leading-relaxed max-w-3xl">
+        {/* Description */}
+        <div className="flex flex-col items-center max-w-3xl">
+          <h1 className="text-3xl md:text-5xl text-white font-bold">Welcome to PhishGuard AI!</h1>
+          <p className="mt-4 text-lg md:text-2xl text-white leading-relaxed">
             Protect your inbox with ease. Upload your email or dataset,  
             and let our AI-powered system detect phishing threats in just seconds.
           </p>
         </div>
       </header>
 
-      <hr className="border-t-4 border-[#d3941a] my-6 w-1/2" />
+      <hr className="border-t-4 border-[#d3941a] my-8 w-1/2" />
 
       {/* Step-by-Step Guide */}
-      <div className="w-full max-w-5xl px-4 md:px-6 mt-8">
-        <h2 className="text-3xl md:text-5xl font-bold text-white text-center mb-10">
-          How It Works?
-        </h2>
+      <div className="w-full max-w-5xl px-4 md:px-6 mt-3">
+        <h2 className="text-3xl md:text-5xl font-bold text-white text-center mb-12">How It Works?</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Step 1 */}
-          <div className="flex flex-col items-center text-center">
-            <div className="bg-white p-6 shadow-md rounded-3xl">
-              <img src="/upload.png" alt="Upload Icon" className="w-24 md:w-32 h-auto max-w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {/* Step Cards */}
+          {[
+            { img: "/upload.png", title: "Upload Your File", text: "Drag and drop or browse your emails or datasets." },
+            { img: "/analyze.png", title: "Analyze Instantly", text: "Our advanced AI scans for phishing threats with precision." },
+            { img: "/secure.png", title: "Stay Secure", text: "Get actionable insights to safeguard your information." }
+          ].map((step, index) => (
+            <div key={index} className="flex flex-col items-center text-center space-y-4">
+              <div className="bg-white p-8 shadow-md rounded-3xl flex items-center justify-center w-32 h-32 md:w-40 md:h-40">
+                <img src={step.img} alt={`${step.title} Icon`} className="w-20 md:w-28 h-auto" />
+              </div>
+              <p className="text-lg md:text-xl text-white">
+                <b>{step.title}</b>
+                <br /> {step.text}
+              </p>
             </div>
-            <p className="mt-4 text-lg md:text-xl text-white">
-              <b>Upload Your File</b>
-              <br /> Drag and drop or browse your emails or datasets.
-            </p>
-          </div>
-
-          {/* Step 2 */}
-          <div className="flex flex-col items-center text-center">
-            <div className="bg-white p-6 shadow-md rounded-3xl">
-              <img src="/analyze.png" alt="Analyze Icon" className="w-24 md:w-32 h-auto max-w-full" />
-            </div>
-            <p className="mt-4 text-lg md:text-xl text-white">
-              <b>Analyze Instantly</b>
-              <br /> Our advanced AI scans for phishing threats with precision.
-            </p>
-          </div>
-
-          {/* Step 3 */}
-          <div className="flex flex-col items-center text-center">
-            <div className="bg-white p-6 shadow-md rounded-3xl">
-              <img src="/secure.png" alt="Result Icon" className="w-24 md:w-32 h-auto max-w-full" />
-            </div>
-            <p className="mt-4 text-lg md:text-xl text-white">
-              <b>Stay Secure</b>
-              <br /> Get actionable insights to safeguard your information.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
 
-      <p className="mt-12 text-lg md:text-2xl text-white text-center px-4">
-        💡 Pro Tip: Regular checks keep your data safe from evolving threats!
+      <hr className="border-t-4 border-[#d3941a] my-12 w-1/2" />
+
+      {/* Pro Tip Section */}
+      <p className="mt-5 text-lg md:text-2xl text-white text-center px-6 max-w-3xl">
+        <b>💡 Pro Tip: Regular checks keep your data safe from evolving threats!</b>
         <br /> Ready to secure your emails? Upload now!
       </p>
 
-      {/* Upload Button (Redirects to First Analysis Result) */}
-      <button
-        onClick={() => navigate("/dashboard/1")}
-        className="mt-8 px-8 md:px-10 py-3 bg-[#d3941a] text-white text-lg font-semibold rounded-lg hover:bg-[#e7a92f] transition-colors flex items-center space-x-3"
-      >
-        <img src="/upload-button.png" alt="Upload Icon" className="w-5 md:w-6 h-auto" />
-        <span>Upload Email File / Dataset</span>
-      </button>
+      {/* Upload Section */}
+      <div className="flex flex-col items-center mt-10">
+        <label
+          htmlFor="fileUpload"
+          className="cursor-pointer px-8 md:px-12 py-4 bg-[#d3941a] text-white text-lg font-semibold rounded-lg hover:bg-[#e7a92f] transition-colors flex items-center space-x-3"
+        >
+          <img src="/upload-button.png" alt="Upload Icon" className="w-6 md:w-7 h-auto" />
+          <span>Upload Email File / Dataset</span>
+        </label>
+        <input type="file" id="fileUpload" className="hidden" onChange={handleUpload} />
+      </div>
+
+      {/* Processing Modal with Loader */}
+      {isUploading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
+          <div className="bg-white p-6 rounded-lg text-center shadow-lg flex flex-col items-center">
+            {/* Spinner Animation */}
+            <div className="loader mb-4"></div>
+
+            <h2 className="text-xl font-semibold text-gray-800">Processing...</h2>
+            <p className="text-gray-600 mt-2">Analyzing the uploaded file, please wait.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Loader Animation (CSS) */}
+      <style>
+        {`
+          .loader {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #d3941a;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 }
