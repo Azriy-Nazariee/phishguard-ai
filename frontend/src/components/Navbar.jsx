@@ -87,7 +87,7 @@ function Navbar() {
 
       {/* Thank You Modal */}
       {showThankYouModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3 text-center">
             <h2 className="text-xl text-black font-semibold mb-4">
               Thank you for using our service!
