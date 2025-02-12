@@ -34,7 +34,7 @@ npm install
 
 ### 3️⃣ Run the Project
 ```bash
-npm npm run dev
+npm run dev
 ```
 
 ## 🛠️ Built With
