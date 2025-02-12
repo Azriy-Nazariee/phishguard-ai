@@ -1,6 +1,6 @@
 # PhishGuard AI - Prototype
 
-PhishGuard AI is a security-driven platform designed to help users detect and prevent phishing attacks using AI-powered threat hunting.
+PhishGuard AI is a security-driven platform designed to help users detect and prevent phishing attacks using AI-powered threat hunting. It is also an application implementation of AI-Powered Threat Hunting For Email Phishing Attack Detection Using Natural Language Processing (NLP) for my Final Year Project (FYP).
 
 ## 📄 Features and Pages
 
