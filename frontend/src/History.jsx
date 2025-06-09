@@ -1,8 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const History = ({ analysisResults }) => {
+const History = () => {
+  const [analysisResults, setAnalysisResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  console.log("Stored token:", localStorage.getItem("token"));
+
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    setError("User not authenticated");
+    setLoading(false);
+    return;
+  }
+
+  fetch("/api/analysis-history", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Failed to fetch analysis history");
+      }
+      return res.json();
+    })
+    .then((data) => {
+      setAnalysisResults(data);
+      setLoading(false);
+    })
+    .catch((err) => {
+      setError(err.message);
+      setLoading(false);
+    });
+}, []);
+
+
+  if (loading) return <p className="text-center text-white">Loading history...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen bg-[#333652] text-white px-6 md:px-10 py-10">
@@ -32,7 +69,7 @@ const History = ({ analysisResults }) => {
               </tr>
             </thead>
             <tbody>
-              {analysisResults.length > 0 ? (
+              {Array.isArray(analysisResults) && analysisResults.length > 0 ? (
                 analysisResults.map((result, index) => (
                   <tr
                     key={result.id}

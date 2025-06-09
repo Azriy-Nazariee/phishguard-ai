@@ -1,24 +1,49 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "./firebase";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // Show the loader immediately
+    setIsSubmitting(true);
+    setError(null);
 
-    // Simulate a fake delay before redirecting
-    setTimeout(() => {
-      navigate("/home");
-    }, 2500);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setTimeout(() => {
+        navigate("/home");
+      }, 2500);
+    } catch (err) {
+      setError(err.message);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await signInWithPopup(auth, googleProvider);
+      setTimeout(() => {
+        navigate("/home");
+      }, 2500);
+    } catch (err) {
+      setError(err.message);
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#333652] px-4 py-10">
+      {/* Header Section */}
       <header className="flex flex-col sm:flex-row items-center sm:items-end justify-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6 p-6 mb-7 w-full max-w-2xl">
         {/* Logo */}
         <img src="/logo.png" alt="PhishGuard AI Logo" className="w-24 sm:w-32 h-auto" />
@@ -39,7 +64,7 @@ function Login() {
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-2">Welcome!</h2>
         <h2 className="text-3xl font-bold text-gray-800 text-center">Log In To Your Account</h2>
 
-        <form onSubmit={handleSubmit} className="mt-6">
+        <form onSubmit={handleEmailLogin} className="mt-6">
           {/* Email Input */}
           <div className="w-full mb-4">
             <label className="block text-lg text-gray-700 text-center" htmlFor="email">
@@ -53,6 +78,7 @@ function Login() {
               className="w-full p-3 mt-2 border border-gray-300 rounded-lg text-center bg-[#e7a92f] text-gray-900 placeholder-gray-700 focus:ring-2 focus:ring-[#0f61a5] focus:outline-none"
               placeholder="Enter your email"
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -69,8 +95,14 @@ function Login() {
               className="w-full p-3 mt-2 border border-gray-300 rounded-lg text-center bg-[#e7a92f] text-gray-900 placeholder-gray-700 focus:ring-2 focus:ring-[#0f61a5] focus:outline-none"
               placeholder="Enter your password"
               required
+              disabled={isSubmitting}
             />
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <p className="text-red-600 text-center font-semibold mt-2">{error}</p>
+          )}
 
           {/* Login Button */}
           <button
@@ -84,31 +116,49 @@ function Login() {
           >
             {isSubmitting ? "Logging in..." : "Log In"}
           </button>
-
-          {/* Sign Up Link */}
-          <p className="mt-4 text-center">
-            Don't have an account?{" "}
-            <a href="/" className="text-[#0f61a5] font-bold hover:underline">
-              Sign Up Here!
-            </a>
-          </p>
         </form>
+
+        {/* OR Divider */}
+        <div className="flex flex-col items-center mt-4">
+          <p className="text-gray-700 font-semibold">or</p>
+        </div>
+
+        {/* Google Login Button */}
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={isSubmitting}
+          className="mt-3 flex items-center justify-center gap-2 w-full sm:w-1/2 px-6 py-3 border border-gray-300 rounded-3xl text-gray-700 bg-white hover:bg-gray-100 transition-colors mx-auto"
+        >
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google"
+            className="w-5 h-5"
+          />
+          {isSubmitting ? "Logging in..." : "Log In with Google"}
+        </button>
+
+        {/* Sign Up Link */}
+        <p className="mt-4 text-center">
+          Don't have an account?{" "}
+          <a href="/" className="text-[#0f61a5] font-bold hover:underline">
+            Sign Up Here!
+          </a>
+        </p>
       </div>
 
-      {/* Processing Modal with Loader */}
+      {/* Success Modal */}
       {isSubmitting && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
           <div className="bg-white p-6 rounded-lg text-center shadow-lg flex flex-col items-center">
-            {/* Spinner Animation */}
             <div className="loader mb-4"></div>
-
             <h2 className="text-xl font-semibold text-gray-800">Login Successful!</h2>
             <p className="text-gray-600 mt-2">Redirecting you to the dashboard...</p>
           </div>
         </div>
       )}
 
-      {/* Loader Animation (CSS) */}
+      {/* Spinner CSS */}
       <style>
         {`
           .loader {

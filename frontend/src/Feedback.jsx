@@ -25,16 +25,44 @@ function Feedback() {
         setFeedback({ ...feedback, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Feedback submitted:", { dashboardId, ...feedback });
+    const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        setIsSubmitting(true); // Show loading animation
+    if (!dashboardId) {
+        alert("Dashboard ID missing.");
+        return;
+    }
 
+    setIsSubmitting(true); // Show loading animation
+
+    try {
+        const response = await fetch("http://localhost:5000/api/feedback", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                dashboardId,
+                type: feedback.type,
+                comments: feedback.comments,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to submit feedback");
+        }
+
+        // Wait 3s before redirect
         setTimeout(() => {
             navigate(`/dashboard/${dashboardId}`);
         }, 3000);
-    };
+    } catch (err) {
+        console.error("Feedback submission error:", err);
+        alert("Error submitting feedback. Please try again.");
+        setIsSubmitting(false);
+    }
+};
+
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[#333652] px-4">

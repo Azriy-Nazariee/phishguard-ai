@@ -12,5 +12,27 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 8081
+    },
+    "functions": {
+      "port": 8082
+    },
+    "firestore": {
+      "port": 8085
+    },
+    "hosting": {
+      "port": 8084
+    },
+    "ui": {
+      "enabled": true,
+      "port": 0
+    },
+    "singleProjectMode": true
+  },
+  "functions": {
+    "source": "functions"
   }
 }
