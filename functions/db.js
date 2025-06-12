@@ -1,21 +1,17 @@
 // db.js
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import mongoose from 'mongoose';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD7PJpjIaryRBnrcTzB4tSF_3FgL2eMdDw",
-  authDomain: "phishguard-ai-f8e71.firebaseapp.com",
-  projectId: "phishguard-ai-f8e71",
-  storageBucket: "phishguard-ai-f8e71.firebasestorage.app",
-  messagingSenderId: "10631846772",
-  appId: "1:10631846772:web:58d5d4f986e1cafdd5ea21",
-  measurementId: "G-S3SRJQHMF9"
-};
+const uri = "mongodb+srv://azriynazariee:tIZw5NkfPLNFPfDn@project.6i6ahbb.mongodb.net/project?retryWrites=true&w=majority&appName=project";
 
-// Initialize Firebase app
-const app = initializeApp(firebaseConfig);
+export async function connect() {
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  });
+  console.log("Connected to MongoDB via Mongoose");
+}
 
-// Initialize Firestore database
-const db = getFirestore(app);
-
-export { db };
+export function getDB() {
+  return mongoose.connection;
+}

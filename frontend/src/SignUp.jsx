@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "./firebase";
+import axios from "axios";
 
 function SignUp() {
   const [email, setEmail] = useState("");
@@ -16,29 +15,21 @@ function SignUp() {
     setError(null);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const response = await axios.post("/api/signup", {
+        email,
+        password,
+      });
+
+      // Success: Redirect after short delay
       setTimeout(() => {
         navigate("/login");
-      }, 2500);
+      }, 2000);
     } catch (err) {
-      console.error("Registration error:", err.message);
-      setError(err.message);
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      await signInWithPopup(auth, googleProvider);
-      setTimeout(() => {
-        navigate("/login");
-      }, 2500);
-    } catch (err) {
-      console.error("Google sign-up error:", err.message);
-      setError(err.message);
+      if (err.response && err.response.status === 409) {
+        setError("User already exists. Please log in.");
+      } else {
+        setError("Network error or something went wrong. Please try again.");
+      }
       setIsSubmitting(false);
     }
   };
@@ -64,7 +55,6 @@ function SignUp() {
         <h2 className="text-3xl font-bold text-gray-800 text-center">Sign Up With Us</h2>
 
         <form onSubmit={handleSubmit} className="mt-6">
-          {/* Email Input */}
           <div className="w-full mb-4">
             <label className="block text-lg text-gray-700 text-center" htmlFor="email">
               Email
@@ -80,7 +70,6 @@ function SignUp() {
             />
           </div>
 
-          {/* Password Input */}
           <div className="w-full mb-4">
             <label className="block text-lg text-gray-700 text-center" htmlFor="password">
               Password
@@ -96,12 +85,10 @@ function SignUp() {
             />
           </div>
 
-          {/* Error Message */}
           {error && (
             <p className="text-red-600 text-center font-semibold mt-2">{error}</p>
           )}
 
-          {/* Sign Up Button */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -114,23 +101,6 @@ function SignUp() {
             {isSubmitting ? "Signing up..." : "Sign Up"}
           </button>
 
-          {/* OR Divider */}
-          <div className="flex flex-col items-center mt-4">
-            <p className="text-gray-700 font-semibold">or</p>
-          </div>
-
-          {/* Google Sign Up Button */}
-          <button
-            type="button"
-            onClick={handleGoogleSignUp}
-            disabled={isSubmitting}
-            className="mt-3 flex items-center justify-center gap-2 w-full sm:w-1/2 px-6 py-3 border border-gray-300 rounded-3xl text-gray-700 bg-white hover:bg-gray-100 transition-colors mx-auto"
-          >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-            Sign Up with Google
-          </button>
-
-          {/* Login Link */}
           <p className="mt-4 text-center">
             Already have an account?{" "}
             <a href="/login" className="text-[#0f61a5] font-bold hover:underline">
@@ -140,8 +110,7 @@ function SignUp() {
         </form>
       </div>
 
-      {/* Success Modal */}
-      {isSubmitting && (
+      {isSubmitting && !error && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md">
           <div className="bg-white p-6 rounded-lg text-center shadow-lg flex flex-col items-center">
             <div className="loader mb-4"></div>
@@ -151,7 +120,6 @@ function SignUp() {
         </div>
       )}
 
-      {/* Spinner CSS */}
       <style>
         {`
           .loader {

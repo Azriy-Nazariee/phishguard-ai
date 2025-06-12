@@ -1,31 +1,44 @@
-import bcrypt from 'bcrypt';
+import { getDB } from "../db.js";
+import { ObjectId } from "mongodb";
 
-const signUpHandler = async (req, res, db) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
+const getReportHandler = async (req, res) => {
   try {
-    // Check if user already exists in MongoDB
-    const existingUser = await db.collection('users').findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ error: 'User already exists' });
+    if (req.method !== "GET") {
+      return res.status(405).send("Method Not Allowed");
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const reportId = req.params.id;
 
-    // Save new user to MongoDB
-    await db.collection('users').insertOne({ email, password: hashedPassword });
+    if (!ObjectId.isValid(reportId)) {
+      return res.status(400).json({ error: "Invalid report ID format" });
+    }
 
-    return res.status(201).json({ message: 'User registered successfully' });
+    const db = getDB();
+    const reportsCollection = db.collection("Reports");
+
+    const result = await reportsCollection.findOne({ _id: new ObjectId(reportId) });
+
+    if (!result) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    // Optional: Format or trim result fields
+    return res.status(200).json({
+      id: result._id,
+      date: result.date,
+      title: result.title,
+      sender: result.sender,
+      isPhishing: result.isPhishing,
+      riskScore: result.riskScore,
+      riskLevel: result.riskLevel,
+      suggestion: result.suggestion,
+      urls: result.urls,
+      limeExplanation: result.limeExplanation,
+    });
   } catch (error) {
-    console.error('Error during signup:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching report:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
-export default signUpHandler;
-
+export default getReportHandler;

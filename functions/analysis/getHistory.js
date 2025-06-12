@@ -1,46 +1,44 @@
-import { getDB } from '../db.js';  // Your MongoDB connection helper
+import { db } from '../firebase.js'; // Firestore from your firebase.js
 
 export const getHistoryHandler = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  const userId = req.userId;  // Use userId from the auth middleware
+  const userId = req.userId; // From auth middleware
 
   if (!userId) {
     return res.status(401).send('User ID is required');
   }
 
   try {
-    const db = getDB();
-    const collection = db.collection('Reports'); // Assuming 'Reports' stores analysis reports
+    const snapshot = await db
+      .collection('Reports')
+      .where('userId', '==', userId)
+      .orderBy('date', 'desc')
+      .get();
 
-    // If userId is a string but stored as ObjectId in DB, convert it
-    // Otherwise, use it as is:
-    const query = { userId };
+    const history = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        date: data.date,
+        title: data.title,
+        sender: data.sender,
+        isPhishing: data.isPhishing,
+        riskScore: data.riskScore,
+        riskLevel: data.riskLevel,
+        suggestion: data.suggestion,
+        urls: data.urls,
+        flaggedKeywords: data.flaggedKeywords || [],
+        userId: data.userId,
+      };
+    });
 
-    const cursor = collection.find(query).sort({ date: -1 });
-
-    const history = await cursor.toArray();
-
-    const formattedHistory = history.map((doc) => ({
-      id: doc._id.toString(),
-      date: doc.date,
-      title: doc.title,
-      sender: doc.sender,
-      isPhishing: doc.isPhishing,
-      riskScore: doc.riskScore,
-      riskLevel: doc.riskLevel,
-      suggestion: doc.suggestion,
-      urls: doc.urls,
-      flaggedKeywords: doc.flaggedKeywords,
-      userId: doc.userId,
-    }));
-
-    return res.status(200).json(formattedHistory);
+    return res.status(200).json(history);
   } catch (error) {
-    console.error('Error fetching history:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('Error fetching history:', error.message || error);
+    return res.status(500).json({ error: 'Error fetching history' });
   }
 };
 

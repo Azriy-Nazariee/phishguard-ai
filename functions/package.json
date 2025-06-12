@@ -19,13 +19,12 @@
     "dotenv": "^16.4.7",
     "eml-format": "^0.6.1",
     "express": "^4.21.2",
+    "firebase": "^9.0.0",
+    "firebase-admin": "^11.11.1",
     "jsonwebtoken": "^9.0.2",
     "mailparser": "^3.7.3",
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.0",
     "multer": "^2.0.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.10"
   }
 }
