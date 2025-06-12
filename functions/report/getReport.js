@@ -1,44 +1,43 @@
-import { getDB } from "../db.js";
-import { ObjectId } from "mongodb";
+const { db } = require("../firebase"); // Firestore from firebase.js
 
 const getReportHandler = async (req, res) => {
+  if (req.method !== "GET") {
+    return res.status(405).send("Method Not Allowed");
+  }
+
+  const reportId = req.params.id;
+
+  if (!reportId) {
+    return res.status(400).json({ error: "Report ID is required" });
+  }
+
   try {
-    if (req.method !== "GET") {
-      return res.status(405).send("Method Not Allowed");
-    }
+    const docRef = db.collection("Reports").doc(reportId);
+    const doc = await docRef.get();
 
-    const reportId = req.params.id;
-
-    if (!ObjectId.isValid(reportId)) {
-      return res.status(400).json({ error: "Invalid report ID format" });
-    }
-
-    const db = getDB();
-    const reportsCollection = db.collection("Reports");
-
-    const result = await reportsCollection.findOne({ _id: new ObjectId(reportId) });
-
-    if (!result) {
+    if (!doc.exists) {
       return res.status(404).json({ error: "Report not found" });
     }
 
-    // Optional: Format or trim result fields
+    const data = doc.data();
+
     return res.status(200).json({
-      id: result._id,
-      date: result.date,
-      title: result.title,
-      sender: result.sender,
-      isPhishing: result.isPhishing,
-      riskScore: result.riskScore,
-      riskLevel: result.riskLevel,
-      suggestion: result.suggestion,
-      urls: result.urls,
-      limeExplanation: result.limeExplanation,
+      id: doc.id,
+      date: data.date,
+      title: data.title,
+      sender: data.sender,
+      isPhishing: data.isPhishing,
+      riskScore: data.riskScore,
+      riskLevel: data.riskLevel,
+      suggestion: data.suggestion,
+      urls: data.urls,
+      limeExplanation: data.limeExplanation || [],
     });
+
   } catch (error) {
-    console.error("Error fetching report:", error);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error fetching report:", error.message || error);
+    return res.status(500).json({ error: "Server error while fetching report" });
   }
 };
 
-export default getReportHandler;
+module.exports = getReportHandler;

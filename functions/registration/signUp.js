@@ -1,44 +1,36 @@
-import { getDB } from "../db.js";
-import { ObjectId } from "mongodb";
+const { admin, db } = require("../firebase");
 
-const getReportHandler = async (req, res) => {
+const signUpHandler = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+
   try {
-    if (req.method !== "GET") {
-      return res.status(405).send("Method Not Allowed");
+    // Check if user already exists
+    const userRecord = await admin.auth().getUserByEmail(email).catch(() => null);
+    if (userRecord) {
+      return res.status(409).json({ error: "User already exists" });
     }
 
-    const reportId = req.params.id;
-
-    if (!ObjectId.isValid(reportId)) {
-      return res.status(400).json({ error: "Invalid report ID format" });
-    }
-
-    const db = getDB();
-    const reportsCollection = db.collection("Reports");
-
-    const result = await reportsCollection.findOne({ _id: new ObjectId(reportId) });
-
-    if (!result) {
-      return res.status(404).json({ error: "Report not found" });
-    }
-
-    // Optional: Format or trim result fields
-    return res.status(200).json({
-      id: result._id,
-      date: result.date,
-      title: result.title,
-      sender: result.sender,
-      isPhishing: result.isPhishing,
-      riskScore: result.riskScore,
-      riskLevel: result.riskLevel,
-      suggestion: result.suggestion,
-      urls: result.urls,
-      limeExplanation: result.limeExplanation,
+    // Create user with Firebase Auth
+    const newUser = await admin.auth().createUser({
+      email,
+      password,
     });
+
+    // Optional: Store extra user info in Firestore
+    await db.collection("users").doc(newUser.uid).set({
+      email,
+      createdAt: new Date(),
+    });
+
+    return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error("Error fetching report:", error);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error during signup:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
-export default getReportHandler;
+module.exports = signUpHandler;

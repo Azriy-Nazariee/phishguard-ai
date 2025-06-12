@@ -1,29 +1,22 @@
-import { db } from '../firebase.js';
+const { getAuth } = require("firebase-admin/auth");
 
-const submitFeedbackHandler = async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
+const authenticateFirebaseUser = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Authorization header missing or invalid" });
   }
 
-  const { dashboardId, type, comments } = req.body;
-
-  if (!dashboardId || !type) {
-    return res.status(400).send('Dashboard ID and feedback type are required');
-  }
+  const idToken = authHeader.split(" ")[1];
 
   try {
-    await db.collection('feedback').add({
-      dashboardId,
-      type,
-      comments: comments || '',
-      submittedAt: new Date().toISOString(),
-    });
-
-    return res.status(201).json({ message: 'Feedback submitted successfully' });
-  } catch (error) {
-    console.error('Error submitting feedback:', error);
-    return res.status(500).json({ error: 'Failed to submit feedback' });
+    const decodedToken = await getAuth().verifyIdToken(idToken);
+    req.userId = decodedToken.uid;
+    req.email = decodedToken.email;
+    next();
+  } catch (err) {
+    console.error("Firebase ID token verification error:", err);
+    return res.status(403).json({ error: "Invalid or expired token" });
   }
 };
 
-export default submitFeedbackHandler;
+module.exports = authenticateFirebaseUser;

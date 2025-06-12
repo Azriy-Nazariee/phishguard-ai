@@ -1,46 +1,47 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; 
+import axios from "axios";
+import { getAuth } from "firebase/auth"; // ✅ Import Firebase Auth
 
 function Home() {
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
 
-  console.log("Stored token:", localStorage.getItem("token"));
-
   const handleUpload = async (event) => {
-    if (event.target.files.length > 0) {
-      setIsUploading(true);
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-      const file = event.target.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
+    setIsUploading(true);
 
-      try {
-        const token = localStorage.getItem("token"); // ✅ Get token from localStorage
+    const formData = new FormData();
+    formData.append("file", file);
 
-        const response = await axios.post("/api/analyse-file", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // ✅ Send token
-          },
-        });
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
 
-        const data = response.data;
-        console.log("Analysis result:", data);
-
+      if (!user) {
+        alert("You must be logged in to upload a file.");
         setIsUploading(false);
-
-        if (data.reportId) {
-          navigate(`/dashboard/${data.reportId}`);
-        } else {
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-        setIsUploading(false);
-        alert("Error uploading or analyzing file");
+        return;
       }
+
+      const token = await user.getIdToken(); // ✅ Get fresh token
+
+      const response = await axios.post("/api/analyse-file", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`, // ✅ Send token
+        },
+      });
+
+      const { reportId } = response.data;
+      navigate(reportId ? `/dashboard/${reportId}` : "/dashboard");
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Error uploading or analyzing file");
+    } finally {
+      setIsUploading(false);
     }
   };
 

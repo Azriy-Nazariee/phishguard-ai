@@ -1,35 +1,30 @@
-import express from 'express';
-import cors from 'cors';
-
-// Import Firebase Auth middleware
-import { authenticateFirebaseUser } from './middleware/authenticateFirebaseUser.js';
-
-// Route handlers
-import signUpHandler from './registration/signUp.js';
-import loginHandler from './registration/login.js';
-import submitFeedbackHandler from './feedback/submitFeedback.js';
-import analyseFileHandler from './analysis/analyseFile.js';
-import getHistoryHandler from './analysis/getHistory.js';
-import getReportHandler from './report/getReport.js';
-
-const app = express();
-const PORT = process.env.PORT || 5000;
+const functions = require('firebase-functions'); // ✅ Important
+const express = require('express');
+const cors = require('cors');
 
 // Middleware
+const authenticateFirebaseUser = require('./middleware/auth');
+
+// Route handlers
+const signUpHandler = require('./registration/signUp');
+const submitFeedbackHandler = require('./feedback/submitFeedback');
+const analyseFileHandler = require('./analysis/analyseFile');
+const getHistoryHandler = require('./analysis/getHistory');
+const getReportHandler = require('./report/getReport');
+
+const app = express();
+
 app.use(cors());
 app.use(express.json());
 
 // Public routes
 app.post('/api/signup', signUpHandler);
-app.post('/api/login', loginHandler);
 app.post('/api/feedback', submitFeedbackHandler);
 
-// Protected routes (require Firebase ID token)
+// Protected routes
 app.post('/api/analyse-file', authenticateFirebaseUser, ...analyseFileHandler);
 app.get('/api/analysis-history', authenticateFirebaseUser, getHistoryHandler);
 app.get('/api/report/:id', authenticateFirebaseUser, getReportHandler);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Don't use app.listen — Firebase handles this
+exports.api = functions.https.onRequest(app);

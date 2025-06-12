@@ -1,6 +1,6 @@
-import { db } from '../firebase.js'; // Firestore from your firebase.js
+const { db } = require('../firebase'); // Firestore from your firebase.js
 
-export const getHistoryHandler = async (req, res) => {
+const getHistoryHandler = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).send('Method Not Allowed');
   }
@@ -42,4 +42,4 @@ export const getHistoryHandler = async (req, res) => {
   }
 };
 
-export default getHistoryHandler;
+module.exports = getHistoryHandler;

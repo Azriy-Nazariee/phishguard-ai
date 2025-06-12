@@ -1,6 +1,6 @@
-import { getDB } from '../db.js';  // your MongoDB connection helper
+const { db } = require('../firebase');
 
-export const submitFeedbackHandler = async (req, res) => {
+const submitFeedbackHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
@@ -12,21 +12,18 @@ export const submitFeedbackHandler = async (req, res) => {
   }
 
   try {
-    const db = getDB();
-    const feedbackCollection = db.collection('feedback');
-
-    await feedbackCollection.insertOne({
+    await db.collection('feedback').add({
       dashboardId,
       type,
       comments: comments || '',
-      submittedAt: new Date(),
+      submittedAt: new Date().toISOString(),
     });
 
     return res.status(201).json({ message: 'Feedback submitted successfully' });
   } catch (error) {
     console.error('Error submitting feedback:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Failed to submit feedback' });
   }
 };
 
-export default submitFeedbackHandler;
+module.exports = submitFeedbackHandler;
